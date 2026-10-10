@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InboxPilot</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      width: 440px; background: #f9fafb; color: #111827;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      padding: 16px 18px 14px; color: white;
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .logo { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; display: flex; align-items: center; gap: 7px; }
+    .logo-mark {
+      width: 22px; height: 22px; background: rgba(255,255,255,0.12);
+      border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; border: 1px solid rgba(255,255,255,0.15);
+    }
+    .status-badge {
+      font-size: 10px; color: #a5b4fc; background: rgba(255,255,255,0.07);
+      padding: 3px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .status-dot { display: inline-block; width: 5px; height: 5px; background: #34d399; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+    .tabs { display: flex; gap: 2px; background: rgba(255,255,255,0.06); border-radius: 7px; padding: 2px; }
+    .tab-btn {
+      flex: 1; padding: 6px 4px; background: transparent; color: #a5b4fc;
+      font-size: 11px; font-weight: 500; border: none; border-radius: 5px;
+      cursor: pointer; transition: all 0.12s; font-family: inherit; width: auto; margin: 0;
+    }
+    .tab-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+    .tab-btn.active { background: rgba(255,255,255,0.14); color: white; font-weight: 600; }
+
+    .content { padding: 14px; }
+
+    .btn-primary {
+      background: #4f46e5; color: white; border: none; padding: 9px 14px;
+      border-radius: 7px; font-weight: 600; font-size: 12px; cursor: pointer;
+      width: 100%; transition: all 0.12s; font-family: inherit;
+    }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-primary:disabled { background: #c7d2fe; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: white; color: #374151; border: 1px solid #e5e7eb;
+      padding: 5px 9px; border-radius: 5px; font-weight: 500; font-size: 10.5px;
+      cursor: pointer; font-family: inherit; width: auto; transition: all 0.1s;
+    }
+    .btn-secondary:hover { background: #f3f4f6; }
+
+    .btn-success { background: #059669; color: white; border: none; padding: 7px 10px; border-radius: 6px; font-weight: 500; font-size: 11px; cursor: pointer; font-family: inherit; width: auto; }
+
+    .action-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+    .search-input {
+      flex: 1; padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 7px;
+      font-size: 11.5px; font-family: inherit; outline: none; background: white;
+    }
+    .search-input:focus { border-color: #818cf8; box-shadow: 0 0 0 2px rgba(129,140,248,0.1); }
+
+    .category-group { background: white; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+    .category-header {
+      padding: 9px 12px; font-weight: 600; font-size: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none;
+    }
+    .category-content { padding: 2px 8px 8px; border-top: 1px solid #f3f4f6; background: #fafbfc; }
+
+    /* Application categories */
+    .cat-offer { background: #f0fdf4; border-left: 3px solid #22c55e; color: #15803d; }
+    .cat-interview { background: #eff6ff; border-left: 3px solid #3b82f6; color: #1d4ed8; }
+    .cat-assessment { background: #fffbeb; border-left: 3px solid #f59e0b; color: #92400e; }
+    .cat-submitted { background: #f5f3ff; border-left: 3px solid #8b5cf6; color: #5b21b6; }
+    .cat-awaiting { background: #fef2f2; border-left: 3px solid #ef4444; color: #991b1b; }
+    .cat-rejected { background: #f9fafb; border-left: 3px solid #9ca3af; color: #4b5563; }
+
+    /* Essentials categories */
+    .ess-utility { background: #fef3c7; border-left: 3px solid #d97706; color: #92400e; }
+    .ess-insurance { background: #dbeafe; border-left: 3px solid #2563eb; color: #1e40af; }
+    .ess-tax { background: #fce7f3; border-left: 3px solid #db2777; color: #9d174d; }
+    .ess-banking { background: #d1fae5; border-left: 3px solid #059669; color: #065f46; }
+    .ess-medical { background: #ede9fe; border-left: 3px solid #7c3aed; color: #5b21b6; }
+    .ess-legal { background: #fee2e2; border-left: 3px solid #dc2626; color: #991b1b; }
+    .ess-rent { background: #ffedd5; border-left: 3px solid #ea580c; color: #9a3412; }
+    .ess-vehicle { background: #e0f2fe; border-left: 3px solid #0284c7; color: #075985; }
+    .ess-subscription { background: #f3e8ff; border-left: 3px solid #9333ea; color: #6b21a8; }
+    .ess-education { background: #ccfbf1; border-left: 3px solid #0d9488; color: #115e59; }
+
+    .counter { font-size: 10px; font-weight: 700; background: rgba(0,0,0,0.06); padding: 2px 7px; border-radius: 10px; }
+
+    .company-card {
+      background: white; border: 1px solid #f3f4f6; border-radius: 7px;
+      padding: 9px 11px; margin-top: 5px;
+    }
+    .comp-title { font-size: 12px; font-weight: 700; color: #111827; }
+    .comp-role { font-size: 10.5px; color: #6b7280; margin-top: 1px; margin-bottom: 5px; }
+    .comp-last-update {
+      font-size: 10.5px; background: #f9fafb; color: #374151;
+      padding: 5px 8px; border-radius: 5px; border-left: 2px solid #818cf8;
+      line-height: 1.4; margin-bottom: 6px;
+    }
+    .card-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    /* Urgency badges */
+    .urgency-badge {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      padding: 2px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .urgency-critical { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .urgency-high { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+    .urgency-medium { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .urgency-low { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+    .ess-due { font-size: 10px; color: #dc2626; font-weight: 600; margin-top: 3px; }
+
+    .chat-box {
+      height: 250px; overflow-y: auto; background: white; border: 1px solid #e5e7eb;
+      border-radius: 8px; padding: 10px; margin-bottom: 8px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .chat-bubble { padding: 8px 10px; border-radius: 8px; font-size: 11.5px; line-height: 1.45; max-width: 88%; }
+    .chat-user { background: #4f46e5; color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+    .chat-ai { background: #f3f4f6; color: #1f2937; align-self: flex-start; border-bottom-left-radius: 3px; }
+    .chat-input-row { display: flex; gap: 5px; }
+
+    .draft-modal {
+      background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+      padding: 12px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .draft-label { font-size: 10px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .draft-textarea {
+      width: 100%; height: 80px; font-size: 11px; font-family: inherit;
+      border: 1px solid #e5e7eb; border-radius: 5px; padding: 7px 9px;
+      resize: vertical; outline: none; color: #374151;
+    }
+
+    .loading-state { text-align: center; padding: 24px 14px; }
+    .loading-spinner {
+      width: 24px; height: 24px; border: 2.5px solid #e5e7eb;
+      border-top-color: #4f46e5; border-radius: 50%;
+      animation: spin 0.6s linear infinite; margin: 0 auto 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 12px; color: #6b7280; font-weight: 500; }
+    .loading-sub { font-size: 10.5px; color: #9ca3af; margin-top: 3px; }
+    .empty-state { text-align: center; padding: 30px 16px; color: #9ca3af; font-size: 12px; line-height: 1.5; }
+    .scan-meta { font-size: 10px; color: #9ca3af; text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; }
+
+    .hidden { display: none !important; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-top">
+      <div class="logo"><div class="logo-mark">IP</div> InboxPilot</div>
+      <div class="status-badge"><span class="status-dot"></span>Connected</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tabDashboard">Applications</button>
+      <button class="tab-btn" id="tabEssentials">Essentials</button>
+      <button class="tab-btn" id="tabChat">Ask AI</button>
+      <button class="tab-btn" id="tabPipeline">History</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- TAB 1: Applications -->
+    <div id="viewDashboard">
+      <button class="btn-primary" id="btnScan">Scan Last 100 Emails</button>
+      <div id="scanLoading" class="hidden"><div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Analyzing applications</div><div class="loading-sub">Processing with Groq AI...</div></div></div>
+      <div id="dashboardResult" class="hidden">
+        <div class="action-bar">
+          <input type="text" id="searchBar" class="search-input" placeholder="Search companies or roles..." />
+          <button class="btn-success" id="btnExport">Export</button>
+        </div>
+        <div id="accordionContainer"></div>
+        <div class="scan-meta" id="scanMeta"></div>
+      </div>
+      <div id="dashboardEmpty" class="empty-state">Scan your inbox to detect and categorize job and internship applications.</div>
+    </div>
+
+    <!-- TAB 2: Essentials -->
+    <div id="viewEssentials" class="hidden">
+      <button class="btn-primary" id="btnScanEssentials" style="background:#059669;">Scan for Bills, Insurance & Critical Mail</button>
+      <div id="essLoading" class="hidden"><div class="loading-state"><div class="loading-spinner"></div><div class="loading-text">Scanning for critical emails</div><div class="loading-sub">Filtering out promotions and noise...</div></div></div>
+      <div id="essResult" class="hidden">
+        <div id="essContainer"></div>
+        <div class="scan-meta" id="essMeta"></div>
+      </div>
+      <div id="essEmpty" class="empty-state">Scan to detect utility bills, insurance renewals, tax notices, bank statements, and other critical emails you should not miss.</div>
+    </div>
+
+    <!-- TAB 3: Chat -->
+    <div id="viewChat" class="hidden">
+      <div class="chat-box" id="chatBox">
+        <div class="chat-bubble chat-ai">Hello. Ask me about your applications, bills, deadlines, or any critical emails.</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" class="search-input" placeholder="e.g. What bills are due this week?" />
+        <button class="btn-primary" id="btnSendChat" style="width:auto; padding:0 14px;">Send</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: History -->
+    <div id="viewPipeline" class="hidden">
+      <div id="trackerList" class="empty-state">Loading history...</div>
+    </div>
+
+    <!-- Draft Modal -->
+    <div id="draftModal" class="draft-modal hidden">
+      <div class="draft-label">Generated Follow-Up Draft</div>
+      <textarea id="draftOutput" class="draft-textarea"></textarea>
+      <button class="btn-secondary" id="btnCloseDraft" style="margin-top:6px; width:100%;">Close</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
